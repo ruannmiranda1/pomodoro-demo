@@ -12,6 +12,10 @@ O protótipo navegável está em `prototipo/` e é a referência de tela e de co
 | Método de login | E-mail + senha (Supabase Auth): entrar, criar conta, esqueci a senha, redefinir senha. |
 | Primeiro login | Dados locais (tarefas + config) são **importados automaticamente**; a tela de Entrar avisa antes. |
 | Contagem | Fim de um foco soma +1 automaticamente na tarefa ativa. Foco pulado não conta. |
+| Confirmação de e-mail | **Desligada** (demo). Criar conta já entra; o único e-mail que o app manda é o de redefinir senha. |
+| Supabase | **Projeto novo**, plano free, só para esta demo. |
+| Repo e domínio | Repo **público** no GitHub pessoal; deploy em `*.vercel.app`, sem domínio próprio. |
+| Runtime | **Bun** (`bun.lock`; a Vercel detecta sozinha). |
 | Visual | Design system VAMOO AI (`@vamoo/design-system`, commit `83356a5` usado no protótipo). Modos se distinguem por superfície (surface / accent-soft / night), sem paleta própria por modo. |
 
 ## Telas → rotas
@@ -22,7 +26,7 @@ O protótipo navegável está em `prototipo/` e é a referência de tela e de co
 | `configuracoes.html` | `/configuracoes` | Client Component |
 | `entrar.html#entrar` / `#criar` | `/entrar` (`?modo=criar`) | Client + Server Action |
 | `entrar.html#esqueci` | `/entrar/esqueci` | Server Action |
-| `entrar.html#enviado` | estado interno das telas acima | — |
+| `entrar.html#enviado` | estado interno de `/entrar/esqueci` | — |
 | `entrar.html#redefinir` | `/entrar/redefinir` | destino do link de reset |
 | — | `/auth/callback` | Route Handler (`exchangeCodeForSession`) |
 
@@ -67,7 +71,7 @@ O estado do timer (modo, `fimEm`, focos do dia) **fica só no localStorage** mes
 
 Um `repositorio` com a mesma interface nos dois modos: `LocalRepo` (localStorage, chaves `pomodoro:*` como no protótipo) e `SupabaseRepo`. O hook `useRepo()` escolhe pela sessão. Assim as telas não sabem se há login.
 
-Importação no primeiro login (no `/auth/callback` e após `signInWithPassword`):
+Importação no primeiro login (após `signInWithPassword` e após `signUp`, que já devolve sessão com a confirmação desligada; no `/auth/callback` só para o fluxo de reset):
 1. Lê tarefas + config do localStorage.
 2. Se `configuracoes` do usuário não existe → `insert` com a config local; se existe, mantém a do servidor.
 3. `insert` das tarefas locais (sem `id`, para não colidir), na ordem.
@@ -108,20 +112,15 @@ supabase/migrations/
 
 ## Fases
 
-1. **Base** — `create-next-app` (TS, ESLint, App Router), `@vamoo/design-system`, Topbar e tema claro/escuro com os quatro blocos.
+0. **Infra** — repo público `pomodoro-demo` no GitHub pessoal (push deste repo local); projeto Supabase novo (região `sa-east-1`); em Auth → Providers → Email, desligar "Confirm email"; projeto na Vercel importando o repo.
+1. **Base** — `bunx create-next-app` (TS, ESLint, App Router), `@vamoo/design-system`, Topbar e tema claro/escuro com os quatro blocos.
 2. **Timer local** — porta do protótipo para `Timer` + `lib/timer.ts` com testes (Vitest): ciclo foco→curta→…→longa, pular, virada de dia, cálculo por `fimEm`.
 3. **Tarefas e configurações locais** — `LocalRepo`, CRUD, contagem automática.
 4. **Supabase** — migrations + RLS + RPC; teste de RLS (usuário A não lê tarefa de B) em pgTAP ou script.
 5. **Auth** — `/entrar`, criar conta, esqueci/redefinir, callback, importação automática.
-6. **Deploy** — projeto na Vercel ligado ao GitHub; env `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Preview e Production); Site URL e Redirect URLs no Supabase (`https://<dominio>/auth/callback` e `https://*-<time>.vercel.app/auth/callback`).
-7. **E2E** — Playwright: timer curto (config de teste), tarefa conta +1, login importa tarefas, RLS pela UI.
+6. **Deploy** — env `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` na Vercel (Preview e Production); no Supabase, Site URL = `https://pomodoro-demo.vercel.app` e Redirect URLs = `https://pomodoro-demo.vercel.app/auth/callback` + `https://pomodoro-demo-*.vercel.app/auth/callback` (previews) + `http://localhost:3000/auth/callback`. Só a anon key vai pro cliente; a service role não entra no projeto.
+7. **E2E** — Playwright: timer curto (config de teste), tarefa conta +1, criar conta importa tarefas, RLS pela UI.
 
-Gate de cada PR: `tsc --noEmit` + lint + Vitest; antes do deploy, build + E2E.
+Gate de cada PR: `bun run type-check` + `bun run lint` + `bun run test`; antes do deploy, `bun run build` + E2E. Como o repo é público, `.env.local` fica no `.gitignore` e o `.env.example` vai commitado só com as chaves.
 
-## PENDENTE (próxima rodada da entrevista)
-
-- Projeto Supabase: novo (recomendado, é demo) ou reaproveitar um existente?
-- Confirmação de e-mail no cadastro: ligada (padrão Supabase, exige SMTP — o built-in tem limite baixo) ou desligada para a demo? Recomendo desligada na demo.
-- Domínio: `*.vercel.app` basta ou vai ter domínio próprio?
-- Repo no GitHub: org/pessoal, público ou privado?
-- Runtime: Bun (como o kanban) ou npm?
+Risco aceito: com a confirmação desligada, qualquer e-mail (inclusive de outra pessoa) cria conta. Para uma demo pública é aceitável; se virar produto, ligar a confirmação com SMTP próprio (Resend).

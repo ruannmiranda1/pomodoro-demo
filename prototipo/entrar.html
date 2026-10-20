@@ -86,7 +86,7 @@
         </form>
       </section>
 
-      <!-- e-mail enviado (confirmação de cadastro ou reset) -->
+      <!-- e-mail de reset enviado -->
       <section data-view="enviado" hidden>
         <div style="display:grid;gap:.75rem">
           <h1 class="titulo-pagina">Confira seu e-mail</h1>
@@ -165,15 +165,11 @@
         erro.hidden = false;
         return;
       }
-      if (modo === "criar") {
-        ultimoEnvio = `Enviamos um link de confirmação para ${email}. Clique nele para ativar a conta.`;
-        location.hash = "enviado";
-        document.querySelector("[data-enviado-texto]").textContent = ultimoEnvio;
-        return;
-      }
+      // confirmação de e-mail desligada: criar conta já devolve sessão
       const n = store.tarefas().length;
       store.entrar(email);
-      toastDepois(n ? `Conta conectada · ${n} ${n === 1 ? "tarefa importada" : "tarefas importadas"}` : "Conta conectada");
+      const inicio = modo === "criar" ? "Conta criada" : "Conta conectada";
+      toastDepois(n ? `${inicio} · ${n} ${n === 1 ? "tarefa importada" : "tarefas importadas"}` : inicio);
       location.href = "index.html";
     });
 
