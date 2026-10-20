@@ -143,7 +143,7 @@ main.app { padding-block: clamp(1.5rem, 4vw, 3rem) 4rem; }
 
 .relogio {
   margin: 0;
-  color: var(--text);
+  color: var(--accent);
   font-size: clamp(4.5rem, 20vw, 9rem);
   font-weight: 800;
   letter-spacing: -0.04em;
