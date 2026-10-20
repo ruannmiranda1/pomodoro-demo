@@ -1,0 +1,937 @@
+/* ============================================================
+   Componentes VAMOO AI
+
+   Gramática Leadster: muito ar, uma ideia por bloco, CTA preta em pílula,
+   azul como acento de dado. Card é branco de 6px com sombra rasa — a única
+   sombra do sistema. Fundo cheio usa --accent-fill, não --accent: o azul
+   puro com texto branco reprova no AA.
+   ============================================================ */
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  position: relative;
+  padding-block: clamp(3.5rem, 9vw, 9rem) clamp(2.5rem, 6vw, 4.5rem);
+  overflow: hidden;
+}
+
+/* a onda do hero — o único gradiente do sistema, e só aqui */
+.masthead::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, var(--glow));
+  pointer-events: none;
+}
+
+/* hero é centrado; bloco de conteúdo continua à esquerda, porque material
+   longo é lido e não escaneado */
+.masthead .wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.masthead .lede { max-width: 52ch; }
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+
+.facts b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- navegação sticky ---------- */
+
+.blocknav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.blocknav .wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 0.6rem;
+}
+
+.blocknav .wrap::-webkit-scrollbar { display: none; }
+
+.blocknav a {
+  flex: none;
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s var(--ease), background 0.2s var(--ease);
+  white-space: nowrap;
+}
+
+.blocknav a:hover { color: var(--text); background: var(--surface); }
+.blocknav a.on { color: var(--on-accent); background: var(--accent-fill); }
+
+/* ---------- bloco ---------- */
+
+.blocks { border-top: 1px solid var(--line); }
+
+.block {
+  display: grid;
+  gap: 1rem 3rem;
+  padding-block: clamp(2.25rem, 5vw, 3.25rem);
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 4rem;
+}
+
+/* minmax(0,1fr) + min-width:0 não são opcionais: sem eles um <pre> de
+   prompt longo estoura a grid e a página rola na horizontal */
+@media (min-width: 820px) {
+  .block { grid-template-columns: 8.5rem minmax(0, 1fr); }
+}
+
+.block > * { min-width: 0; }
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: flex-start;
+}
+
+.clock {
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s var(--ease);
+}
+
+.block:hover .clock { color: var(--accent); }
+
+.dur {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.15rem;
+  min-width: 0;
+}
+
+.body > * { max-width: 100%; }
+
+.block h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.block h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.block p {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--dim);
+}
+
+.block p strong, .block li strong { color: var(--text); font-weight: 700; }
+
+/* ---------- etiquetas ----------
+   O peso visual cresce junto com a responsabilidade de quem lê.
+   Não invente uma quinta cor. */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.tag-conceito { color: var(--faint); padding-inline: 0; }
+.tag-demo { color: var(--dim); border: 1px solid var(--line); }
+.tag-juntos { background: var(--accent-fill); color: var(--on-accent); }
+.tag-sozinho { background: var(--text); color: var(--bg); }
+.tag-pausa { color: var(--faint); border: 1px dashed var(--line); }
+
+/* ---------- destaque ---------- */
+
+.pull {
+  border-left: 3px solid var(--accent);
+  padding: 0.1rem 0 0.1rem 1.15rem;
+  font-size: clamp(1.05rem, 2.1vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--text);
+  font-weight: 500;
+  max-width: 56ch;
+  margin: 0;
+}
+
+.pull cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-style: normal;
+  color: var(--faint);
+}
+
+.tip {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  font-size: 0.92rem;
+  color: var(--dim);
+  max-width: 62ch;
+  margin: 0;
+}
+
+.tip b { color: var(--text); font-weight: 700; }
+
+.warn { border-left-color: var(--text); }
+
+/* ---------- cards ---------- */
+
+.cards {
+  display: grid;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+@media (min-width: 700px) {
+  .cards-2 { grid-template-columns: 1fr 1fr; }
+  .cards-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+  padding: 1.25rem 1.3rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.3s var(--ease);
+}
+
+/* hover só muda a borda — sem levantar, sem escala, sem sombra */
+.card:hover { border-color: var(--accent); }
+
+.card .k {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.card h3 { margin: 0; }
+
+.card p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--dim);
+}
+
+/* slot "e o que isso significa para você" — o que separa material de folheto */
+.card .unicus {
+  margin-top: 0.15rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+
+.card .unicus b { color: var(--dim); font-weight: 700; }
+
+/* ---------- listas ---------- */
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 64ch;
+  color: var(--dim);
+  counter-reset: li-c;
+}
+
+/* o marcador é absoluto de propósito: um `li` em grid transformaria cada
+   <strong> do texto num item de grid e empilharia as palavras */
+.list li {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.list li::before {
+  content: counter(li-c);
+  counter-increment: li-c;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.35rem;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.9;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.list-plain li::before { content: "—"; color: var(--faint); }
+
+/* ---------- tabela ---------- */
+
+.tablewrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  min-width: 33rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+
+thead th {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+td:first-child { color: var(--text); font-weight: 600; }
+td { color: var(--dim); }
+
+/* tabela para preencher na aula: linha alta o bastante para escrever à mão */
+.table-fill tbody td { height: 3rem; }
+.table-fill tbody td:empty::after {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 1.4rem;
+  background: var(--line-soft);
+}
+
+/* ---------- bloco de comando ---------- */
+
+.cmd {
+  width: 100%;
+  background: var(--shell-bg);
+  border: 1px solid var(--shell-line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.cmd header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.55rem 0.55rem 1rem;
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.cmd header span {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(230 229 222 / 0.5);
+}
+
+.copy {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--shell-line);
+  color: var(--shell-text);
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.copy:hover, .copy[data-done="true"] {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: var(--ink);
+}
+
+/* pre-wrap: prompt longo quebra em vez de criar barra horizontal */
+.cmd pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  color: var(--shell-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cmd code { background: none; padding: 0; }
+
+/* ---------- checklist ---------- */
+
+.checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border-top: 1px solid var(--line);
+}
+
+.checks li { border-bottom: 1px solid var(--line); }
+
+/* padding generoso: o alvo de toque tem que passar de 44px */
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 0.25rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.checks input {
+  appearance: none;
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  margin: 0;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.checks input::after {
+  content: "";
+  width: 0.42rem;
+  height: 0.72rem;
+  border: solid var(--ink);
+  border-width: 0 2px 2px 0;
+  rotate: 45deg;
+  translate: 0 -1px;
+  opacity: 0;
+  transition: opacity 0.15s var(--ease);
+}
+
+.checks input:checked {
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.checks input:checked::after { opacity: 1; }
+
+.checks input:checked + span {
+  color: var(--faint);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.progress {
+  margin: 1.25rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress[data-complete="true"] { color: var(--accent); }
+
+/* ---------- fechamento ---------- */
+
+.closer { padding-block: clamp(2.75rem, 6vw, 4rem); }
+
+.closer h2 {
+  margin: 0.9rem 0 1.5rem;
+  font-size: clamp(1.9rem, 4.6vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  padding-block: 2.25rem 3rem;
+}
+
+footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem 2rem;
+}
+
+footer p {
+  margin: 0;
+  max-width: 54ch;
+  color: var(--dim);
+  font-size: 0.92rem;
+}
+
+.brand {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* ---------- folha, verbete, anotação, roteiro ---------- */
+
+.sheet { padding-block: clamp(2rem, 5vw, 3rem); }
+
+.sheet + .sheet { border-top: 1px solid var(--line); }
+
+.sheet > header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+}
+
+/* H2 de seção: 44/500/-5% no desktop, a medida da Leadster */
+.sheet h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+/* :not(.eyebrow) porque o eyebrow é um <p> e mora aqui dentro — sem isso esta
+   regra vence a cor do accent e o rótulo do Sheet sai cinza. */
+.sheet > header > p:not(.eyebrow) {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--dim);
+}
+
+.gloss {
+  display: grid;
+  gap: 0.85rem;
+}
+
+@media (min-width: 720px) { .gloss { grid-template-columns: 1fr 1fr; } }
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 1.15rem 1.2rem 1.25rem;
+  background: color-mix(in srgb, var(--surface) 45%, transparent);
+  transition: border-color 0.3s var(--ease);
+}
+
+.entry:hover { border-color: var(--accent); }
+
+/* mesma gramática das etiquetas, outro eixo: nível de dificuldade */
+.entry .lvl {
+  align-self: flex-start;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+}
+
+.lvl-1 { color: var(--dim); border: 1px solid var(--line); }
+.lvl-2 { background: var(--accent-fill); color: var(--on-accent); }
+.lvl-3 { background: var(--text); color: var(--bg); }
+
+.entry h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.entry h3 span {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.4rem;
+}
+
+.entry p {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--dim);
+}
+
+.entry .unicus {
+  margin-top: 0.2rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.86rem;
+  color: var(--faint);
+}
+
+.entry .unicus b { color: var(--dim); font-weight: 700; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  padding-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--faint);
+}
+
+.legend .lvl {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  margin-right: 0.4rem;
+}
+
+/* campo para anotar à mão ou na tela */
+.note {
+  width: 100%;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-card);
+  padding: 1rem 1.1rem;
+  min-height: 5.5rem;
+  color: var(--faint);
+  font-size: 0.86rem;
+}
+
+.note b { display: block; color: var(--dim); font-weight: 700; margin-bottom: 0.35rem; }
+
+/* roteiro de fala do facilitador */
+.script {
+  border-left: 3px solid var(--line);
+  padding-left: 1.15rem;
+  max-width: 62ch;
+  color: var(--dim);
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.script b {
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.script em { color: var(--text); font-style: italic; }
+
+/* ---------- camada site (landing) ----------
+   Promoção do protótipo landing.html: o que o material de palestra não
+   precisava e um site que converte precisa — chamada para ação, navegação
+   com marca, faixa de credibilidade, faixa de conversão. Mesma gramática:
+   pill, borda em vez de sombra, peso 800, hover só por cor. */
+
+/* CTA de marketing é preta em pílula — nunca azul. O azul é acento de dado,
+   link de produto e botão de admin. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 49px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0 30px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-primary:hover { background: color-mix(in srgb, var(--text) 82%, var(--dim)); }
+
+.btn-ghost { border-color: var(--line); color: var(--text); background: transparent; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* superfície de admin: retângulo de 6px, 36px de altura, azul cheio */
+.btn-admin {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-card);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+
+.btn-admin:hover { background: color-mix(in srgb, var(--accent-fill) 86%, #000); }
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding-top: 1rem;
+}
+
+/* nav de site: marca à esquerda, links, CTA na ponta — sem spy de seção */
+/* Header de 89px, sem borda, sem sombra, sem blur — medido na Leadster.
+   Lá ele é `fixed` sobre um hero de 300px de padding; aqui é `sticky` e
+   opaco, para não rasgar o texto de quem usa o DS em página de conteúdo. */
+.sitenav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+}
+
+.sitenav .wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  min-height: var(--header-h);
+}
+
+/* fallback textual da marca — só para sub-produto que ainda não tem logo */
+.sitenav .logo {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.sitenav .links {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.4rem;
+}
+
+.sitenav .links a {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--dim);
+  text-decoration: none;
+  transition: color 0.2s var(--ease);
+}
+
+.sitenav .links a:hover { color: var(--text); }
+.sitenav .btn { height: 44px; padding: 0 24px; }
+
+@media (max-width: 820px) {
+  .sitenav .links { display: none; }
+  .sitenav .wrap { justify-content: space-between; }
+}
+
+/* hero de site respira mais que masthead de treinamento */
+.sitenav + .masthead .wrap { padding-block: clamp(4rem, 10vw, 7rem) clamp(2.5rem, 6vw, 4rem); }
+
+.trust {
+  padding-block: 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.trust .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.8rem;
+}
+
+.trust .wrap > span:first-child {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.trust b {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--dim);
+  letter-spacing: -0.01em;
+}
+
+/* faixa de conversão: o shell dos comandos, agora como chamada final.
+   Escura nos dois temas por decisão — é a voz da máquina, não do editorial. */
+.cta-band {
+  background: var(--shell-bg);
+  border-top: 1px solid var(--shell-line);
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.cta-band .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem 2.5rem;
+  padding-block: clamp(2.6rem, 6vw, 4rem);
+}
+
+.cta-band h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.6vw, 2.75rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+  color: var(--shell-text);
+  max-width: 22ch;
+}
+
+.cta-band p {
+  margin: 0.6rem 0 0;
+  max-width: 46ch;
+  font-size: 0.92rem;
+  color: rgb(255 255 255 / 0.66);
+}
+
+/* ---------- faixa escura e métrica ----------
+   A prova social da Leadster: fundo #05070a, H2 branco na mesma escala,
+   número gigante em cinza-azulado. */
+
+.faixa-escura {
+  background: var(--night);
+  color: rgb(255 255 255 / 0.68);
+  padding-block: var(--section-y);
+}
+
+.faixa-escura h2,
+.faixa-escura h3 { color: #fff; }
+
+.faixa-escura .card {
+  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.1);
+  box-shadow: none;
+}
+
+.metrica {
+  display: block;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 14vw, 12.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--dim);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.faixa-escura .metrica { color: rgb(255 255 255 / 0.5); }
+
+.metrica + p {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  color: var(--dim);
+}
+
+/* CTA dentro de faixa escura inverte: pílula branca com tinta escura.
+   A preta some no #05070a. */
+.cta-band .btn-primary,
+.faixa-escura .btn-primary {
+  background: var(--shell-text);
+  color: var(--night);
+}
+
+.cta-band .btn-primary:hover,
+.faixa-escura .btn-primary:hover { background: rgb(255 255 255 / 0.86); }
+
+.cta-band .btn-ghost,
+.faixa-escura .btn-ghost {
+  border-color: rgb(255 255 255 / 0.24);
+  color: var(--shell-text);
+}
+
+.cta-band .btn-ghost:hover,
+.faixa-escura .btn-ghost:hover {
+  border-color: var(--shell-text);
+  color: var(--shell-text);
+}

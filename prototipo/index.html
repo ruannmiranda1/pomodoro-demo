@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>25:00 · Pomodoro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="vamoo/tokens.css">
+  <link rel="stylesheet" href="vamoo/base.css">
+  <link rel="stylesheet" href="vamoo/components.css">
+  <link rel="stylesheet" href="vamoo/brand.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js"></script>
+</head>
+<body>
+  <header class="sitenav topbar">
+    <div class="wrap">
+      <a class="app-nome" href="index.html">
+        <span class="marca-infinito" aria-hidden="true"></span>
+        Pomodoro <small>por VAMOO AI</small>
+      </a>
+      <nav aria-label="Principal">
+        <a class="navlink" href="index.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>
+          <span class="rotulo">Timer</span>
+        </a>
+        <a class="navlink" href="configuracoes.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+          <span class="rotulo">Configurações</span>
+        </a>
+        <button class="navlink" data-tema aria-label="Alternar tema claro/escuro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+        </button>
+        <span data-conta></span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app wrap">
+    <div class="coluna">
+      <section class="timer" data-modo="foco" aria-label="Timer">
+        <div class="modos" role="tablist" aria-label="Modo">
+          <button role="tab" data-modo="foco" aria-selected="true">Foco</button>
+          <button role="tab" data-modo="curta" aria-selected="false">Pausa curta</button>
+          <button role="tab" data-modo="longa" aria-selected="false">Pausa longa</button>
+        </div>
+
+        <p class="estado" data-estado>Pronto para começar</p>
+        <p class="relogio" data-relogio aria-live="off">25:00</p>
+        <div class="progresso" aria-hidden="true"><span data-progresso></span></div>
+
+        <div class="controles">
+          <button class="btn btn-primary btn-play" data-play>Iniciar</button>
+          <button class="btn btn-ghost btn-icone" data-reiniciar aria-label="Reiniciar ciclo" title="Reiniciar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-icone" data-pular aria-label="Pular para o próximo" title="Pular">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 7-10 7z" fill="currentColor"/><path d="M19 5v14"/></svg>
+          </button>
+        </div>
+
+        <div class="ciclos">
+          <span class="pontos" data-pontos></span>
+          <span data-ciclos-texto>#1</span>
+        </div>
+
+        <p class="tarefa-ativa" data-tarefa-ativa></p>
+
+        <div class="aviso" data-aviso role="alert" hidden>
+          <p data-aviso-texto></p>
+          <button class="btn btn-primary" data-aviso-acao>Começar pausa</button>
+        </div>
+      </section>
+
+      <div class="dica-sync" data-dica hidden>
+        <p>Suas tarefas e configurações estão só neste navegador.</p>
+        <a href="entrar.html">Entrar para sincronizar</a>
+        <button data-fechar-dica aria-label="Dispensar">×</button>
+      </div>
+
+      <section class="tarefas" aria-labelledby="t-tarefas">
+        <header>
+          <h2 id="t-tarefas">Tarefas</h2>
+          <button data-limpar-concluidas hidden>Limpar concluídas</button>
+        </header>
+
+        <ul class="lista-tarefas" data-lista></ul>
+        <div class="vazio" data-vazio>
+          <strong>Nenhuma tarefa ainda</strong>
+          Adicione o que você vai fazer e quantos pomodoros acha que leva.
+        </div>
+
+        <form class="nova-tarefa" data-nova>
+          <div class="campo">
+            <label for="nt-nome">Nova tarefa</label>
+            <input class="input" id="nt-nome" name="nome" placeholder="Ex.: revisar proposta" required maxlength="120" autocomplete="off">
+          </div>
+          <div class="campo">
+            <label for="nt-est">Pomodoros</label>
+            <input class="input estimativa" id="nt-est" name="estimativa" type="number" min="1" max="20" value="1" required>
+          </div>
+          <button class="btn btn-admin" style="height:40px">Adicionar</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const MODOS = { foco: "Foco", curta: "Pausa curta", longa: "Pausa longa" };
+    const $ = (s) => document.querySelector(s);
+    const el = {
+      timer: $(".timer"), estado: $("[data-estado]"), relogio: $("[data-relogio]"),
+      progresso: $("[data-progresso]"), play: $("[data-play]"), pontos: $("[data-pontos]"),
+      ciclosTexto: $("[data-ciclos-texto]"), tarefaAtiva: $("[data-tarefa-ativa]"),
+      aviso: $("[data-aviso]"), avisoTexto: $("[data-aviso-texto]"), avisoAcao: $("[data-aviso-acao]"),
+      lista: $("[data-lista]"), vazio: $("[data-vazio]"), limpar: $("[data-limpar-concluidas]"),
+      dica: $("[data-dica]"),
+    };
+
+    let config = store.config();
+    let tarefas = store.tarefas();
+
+    // O tempo restante sai de `fimEm` (timestamp), nunca de um contador
+    // decrementado: aba em background estrangula o setInterval e o contador mente.
+    let t = ler(CHAVES.timer, null) ?? {
+      modo: "foco", fimEm: null, restanteMs: config.foco * 60000,
+      focosFeitos: 0, tarefaAtiva: null,
+    };
+    let tick;
+
+    const duracao = (modo) => config[modo] * 60000;
+    const rodando = () => t.fimEm !== null;
+    const restante = () => (rodando() ? Math.max(0, t.fimEm - Date.now()) : t.restanteMs);
+    const salvarTimer = () => gravar(CHAVES.timer, t);
+
+    function fmt(ms) {
+      const s = Math.ceil(ms / 1000);
+      return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+    }
+
+    function proximoModo() {
+      if (t.modo !== "foco") return "foco";
+      return t.focosFeitos % config.intervaloLonga === 0 ? "longa" : "curta";
+    }
+
+    function trocarModo(modo) {
+      t.modo = modo;
+      t.fimEm = null;
+      t.restanteMs = t.duracaoMs = duracao(modo);
+      salvarTimer();
+      renderTimer();
+    }
+
+    function iniciar() {
+      destravarAudio();
+      if (config.notificar && "Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+      t.fimEm = Date.now() + t.restanteMs;
+      el.aviso.hidden = true;
+      salvarTimer();
+      loop();
+    }
+
+    function pausar() {
+      t.restanteMs = restante();
+      t.fimEm = null;
+      salvarTimer();
+      clearInterval(tick);
+      renderTimer();
+    }
+
+    function loop() {
+      clearInterval(tick);
+      tick = setInterval(() => (restante() <= 0 ? concluir() : renderTimer()), 250);
+      renderTimer();
+    }
+
+    function concluir({ pulado = false } = {}) {
+      clearInterval(tick);
+      const terminou = t.modo;
+      // foco pulado não conta: nem pro ciclo, nem pra tarefa
+      if (terminou === "foco" && !pulado) {
+        t.focosFeitos++;
+        const ativa = tarefas.find((x) => x.id === t.tarefaAtiva);
+        if (ativa) {
+          ativa.feitos++;
+          store.salvarTarefas(tarefas);
+          renderTarefas();
+        }
+      }
+      if (!pulado) {
+        tocar(config.som, config.volume);
+        notificar(terminou);
+      }
+      const prox = pulado && terminou === "foco" ? "curta" : proximoModo();
+      trocarModo(prox);
+
+      const auto = prox === "foco" ? config.autoFoco : config.autoPausa;
+      if (auto && !pulado) {
+        iniciar();
+        toast(`${MODOS[prox]} começou automaticamente.`);
+      } else if (!pulado) {
+        el.avisoTexto.textContent =
+          terminou === "foco"
+            ? `Foco concluído. Hora de uma ${MODOS[prox].toLowerCase()}.`
+            : "Pausa encerrada. Bora pro próximo foco?";
+        el.avisoAcao.textContent = prox === "foco" ? "Começar foco" : `Começar ${MODOS[prox].toLowerCase()}`;
+        el.aviso.hidden = false;
+      }
+    }
+
+    function notificar(terminou) {
+      if (!config.notificar || !("Notification" in window) || Notification.permission !== "granted") return;
+      new Notification(terminou === "foco" ? "Foco concluído" : "Pausa encerrada", {
+        body: terminou === "foco" ? "Respira. A pausa já está pronta." : "Hora de voltar ao foco.",
+        silent: true,
+      });
+    }
+
+    function renderTimer() {
+      const ms = restante();
+      el.timer.dataset.modo = t.modo;
+      document.querySelectorAll(".modos button").forEach((b) =>
+        b.setAttribute("aria-selected", String(b.dataset.modo === t.modo)));
+      el.relogio.textContent = fmt(ms);
+      el.progresso.style.width = `${(1 - ms / duracao(t.modo)) * 100}%`;
+      el.play.textContent = rodando() ? "Pausar" : ms < duracao(t.modo) ? "Continuar" : "Iniciar";
+
+      const pausado = !rodando() && ms < duracao(t.modo);
+      el.estado.textContent = rodando()
+        ? (t.modo === "foco" ? "Em foco" : "Em pausa")
+        : pausado ? "Pausado" : t.modo === "foco" ? "Pronto para começar" : "Pausa pronta";
+      el.estado.toggleAttribute("data-ativo", rodando());
+
+      const noCiclo = t.focosFeitos % config.intervaloLonga;
+      const cheios = t.modo === "longa" && noCiclo === 0 && t.focosFeitos > 0 ? config.intervaloLonga : noCiclo;
+      el.pontos.innerHTML = Array.from({ length: config.intervaloLonga },
+        (_, i) => `<i class="${i < cheios ? "feito" : ""}"></i>`).join("");
+      el.ciclosTexto.textContent = `${t.focosFeitos} ${t.focosFeitos === 1 ? "foco" : "focos"} hoje`;
+
+      const ativa = tarefas.find((x) => x.id === t.tarefaAtiva && !x.concluida);
+      el.tarefaAtiva.innerHTML = ativa
+        ? `Trabalhando em <b>${escapar(ativa.nome)}</b>`
+        : tarefas.some((x) => !x.concluida) ? "Escolha uma tarefa abaixo para contar os pomodoros." : "";
+
+      document.title = `${fmt(ms)} · ${MODOS[t.modo]}`;
+    }
+
+    // ---------- tarefas ----------
+
+    function escapar(s) {
+      return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function renderTarefas() {
+      el.vazio.hidden = tarefas.length > 0;
+      el.limpar.hidden = !tarefas.some((x) => x.concluida);
+      el.lista.innerHTML = tarefas.map((x) => `
+        <li class="tarefa ${x.concluida ? "concluida" : ""}" data-id="${x.id}" aria-current="${x.id === t.tarefaAtiva && !x.concluida}">
+          <input type="checkbox" class="check" ${x.concluida ? "checked" : ""} aria-label="Concluir ${escapar(x.nome)}">
+          <span class="nome">${escapar(x.nome)}</span>
+          <span class="contagem" title="realizados / estimados"><b>${x.feitos}</b>/${x.estimativa}</span>
+          <button class="remover" aria-label="Remover ${escapar(x.nome)}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </li>`).join("");
+      renderTimer();
+      renderDica();
+    }
+
+    el.lista.addEventListener("click", (e) => {
+      const li = e.target.closest(".tarefa");
+      if (!li) return;
+      const tarefa = tarefas.find((x) => x.id === li.dataset.id);
+      if (e.target.closest(".remover")) {
+        tarefas = tarefas.filter((x) => x !== tarefa);
+        if (t.tarefaAtiva === tarefa.id) t.tarefaAtiva = null;
+      } else if (e.target.matches(".check")) {
+        tarefa.concluida = e.target.checked;
+        if (tarefa.concluida && t.tarefaAtiva === tarefa.id) t.tarefaAtiva = null;
+      } else if (!tarefa.concluida) {
+        t.tarefaAtiva = t.tarefaAtiva === tarefa.id ? null : tarefa.id;
+      }
+      store.salvarTarefas(tarefas);
+      salvarTimer();
+      renderTarefas();
+    });
+
+    $("[data-nova]").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const nova = {
+        id: crypto.randomUUID(), nome: f.get("nome").trim(),
+        estimativa: Number(f.get("estimativa")), feitos: 0, concluida: false,
+      };
+      if (!nova.nome) return;
+      tarefas.push(nova);
+      if (!t.tarefaAtiva) t.tarefaAtiva = nova.id;
+      store.salvarTarefas(tarefas);
+      salvarTimer();
+      e.target.reset();
+      renderTarefas();
+      e.target.nome.focus();
+    });
+
+    el.limpar.onclick = () => {
+      tarefas = tarefas.filter((x) => !x.concluida);
+      store.salvarTarefas(tarefas);
+      renderTarefas();
+    };
+
+    // ---------- controles ----------
+
+    el.play.onclick = () => (rodando() ? pausar() : iniciar());
+    $("[data-reiniciar]").onclick = () => { clearInterval(tick); trocarModo(t.modo); };
+    $("[data-pular]").onclick = () => { el.aviso.hidden = true; concluir({ pulado: true }); };
+    el.avisoAcao.onclick = iniciar;
+    document.querySelectorAll(".modos button").forEach((b) => (b.onclick = () => {
+      if (b.dataset.modo === t.modo) return;
+      if (rodando() && !confirm("O timer está rodando. Trocar de modo zera o ciclo atual.")) return;
+      clearInterval(tick);
+      el.aviso.hidden = true;
+      trocarModo(b.dataset.modo);
+    }));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && !e.target.closest("input, button, textarea, select")) {
+        e.preventDefault();
+        el.play.click();
+      }
+    });
+
+    function renderDica() {
+      el.dica.hidden = !!store.sessao() || ler(CHAVES.dicaFechada, false) || tarefas.length === 0;
+    }
+    $("[data-fechar-dica]").onclick = () => { gravar(CHAVES.dicaFechada, true); renderDica(); };
+    document.addEventListener("sessao", renderDica);
+
+    // ao voltar das configurações, um timer parado reflete a duração nova
+    const hoje = new Date().toDateString();
+    if (t.dia !== hoje) {
+      t.dia = hoje;
+      t.focosFeitos = 0;
+    }
+    if (!rodando() && t.restanteMs === (t.duracaoMs ?? t.restanteMs)) {
+      t.restanteMs = t.duracaoMs = duracao(t.modo);
+    }
+    if (rodando()) {
+      restante() <= 0 ? concluir() : loop();
+    }
+    renderTarefas();
+    renderDica();
+  </script>
+</body>
+</html>

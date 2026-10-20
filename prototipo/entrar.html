@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Pomodoro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="vamoo/tokens.css">
+  <link rel="stylesheet" href="vamoo/base.css">
+  <link rel="stylesheet" href="vamoo/components.css">
+  <link rel="stylesheet" href="vamoo/brand.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js"></script>
+</head>
+<body>
+  <header class="sitenav topbar">
+    <div class="wrap">
+      <a class="app-nome" href="index.html">
+        <span class="marca-infinito" aria-hidden="true"></span>
+        Pomodoro <small>por VAMOO AI</small>
+      </a>
+      <nav aria-label="Principal">
+        <a class="navlink" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>
+          <span class="rotulo">Voltar ao timer</span>
+        </a>
+        <button class="navlink" data-tema aria-label="Alternar tema claro/escuro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app wrap">
+    <div class="auth">
+      <!-- entrar / criar conta -->
+      <section data-view="entrar criar">
+        <div style="display:grid;gap:.5rem;margin-bottom:1.25rem">
+          <h1 class="titulo-pagina" data-titulo>Entrar</h1>
+          <p class="lede">O timer funciona sem conta. Entrar só serve para levar suas tarefas e configurações para outros aparelhos.</p>
+        </div>
+
+        <div class="abas" role="tablist">
+          <button role="tab" data-ir="entrar">Entrar</button>
+          <button role="tab" data-ir="criar">Criar conta</button>
+        </div>
+
+        <form data-form-auth style="margin-top:1.25rem" novalidate>
+          <p class="erro" data-erro role="alert" hidden></p>
+          <div class="campo">
+            <label for="a-email">E-mail</label>
+            <input class="input" id="a-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="campo">
+            <div class="linha" style="padding:0">
+              <label for="a-senha">Senha</label>
+              <a class="link" href="#esqueci" data-so="entrar">Esqueci a senha</a>
+            </div>
+            <input class="input" id="a-senha" name="senha" type="password" autocomplete="current-password" required minlength="8">
+            <p class="ajuda" data-so="criar">Mínimo de 8 caracteres.</p>
+          </div>
+
+          <div class="importa" data-importa hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+            <p data-importa-texto></p>
+          </div>
+
+          <button class="btn btn-admin largo" data-enviar>Entrar</button>
+        </form>
+      </section>
+
+      <!-- esqueci a senha -->
+      <section data-view="esqueci" hidden>
+        <div style="display:grid;gap:.5rem;margin-bottom:1.25rem">
+          <h1 class="titulo-pagina">Esqueci a senha</h1>
+          <p class="lede">Mandamos um link para você criar uma senha nova.</p>
+        </div>
+        <form data-form-esqueci>
+          <div class="campo">
+            <label for="e-email">E-mail</label>
+            <input class="input" id="e-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <button class="btn btn-admin largo">Enviar link</button>
+          <a class="link" href="#entrar">← Voltar para entrar</a>
+        </form>
+      </section>
+
+      <!-- e-mail enviado (confirmação de cadastro ou reset) -->
+      <section data-view="enviado" hidden>
+        <div style="display:grid;gap:.75rem">
+          <h1 class="titulo-pagina">Confira seu e-mail</h1>
+          <p class="lede" data-enviado-texto></p>
+          <p style="margin:0;font-size:.85rem;color:var(--faint)">Não chegou em 2 minutos? Olhe o spam ou <button class="link" data-reenviar>reenvie</button>.</p>
+          <a class="link" href="#entrar">← Voltar para entrar</a>
+        </div>
+      </section>
+
+      <!-- destino do link de reset -->
+      <section data-view="redefinir" hidden>
+        <div style="display:grid;gap:.5rem;margin-bottom:1.25rem">
+          <h1 class="titulo-pagina">Nova senha</h1>
+          <p class="lede">Escolha uma senha nova para a sua conta.</p>
+        </div>
+        <form data-form-redefinir>
+          <div class="campo">
+            <label for="r-senha">Nova senha</label>
+            <input class="input" id="r-senha" type="password" autocomplete="new-password" required minlength="8">
+            <p class="ajuda">Mínimo de 8 caracteres.</p>
+          </div>
+          <button class="btn btn-admin largo">Salvar senha</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const views = document.querySelectorAll("[data-view]");
+    const formAuth = document.querySelector("[data-form-auth]");
+    const erro = document.querySelector("[data-erro]");
+    let ultimoEnvio = "";
+
+    function mostrar() {
+      const v = location.hash.slice(1) || "entrar";
+      views.forEach((s) => (s.hidden = !s.dataset.view.split(" ").includes(v)));
+      if (v === "entrar" || v === "criar") {
+        document.querySelectorAll("[data-ir]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.ir === v)));
+        document.querySelectorAll("[data-so]").forEach((x) => (x.hidden = x.dataset.so !== v));
+        document.querySelector("[data-titulo]").textContent = v === "entrar" ? "Entrar" : "Criar conta";
+        document.querySelector("[data-enviar]").textContent = v === "entrar" ? "Entrar" : "Criar conta";
+        formAuth.senha.autocomplete = v === "entrar" ? "current-password" : "new-password";
+        erro.hidden = true;
+      }
+      renderImporta();
+    }
+
+    // Importação automática: avisa antes, para não surpreender.
+    function renderImporta() {
+      const n = store.tarefas().length;
+      const temConfig = localStorage.getItem(CHAVES.config) !== null;
+      const box = document.querySelector("[data-importa]");
+      box.hidden = n === 0 && !temConfig;
+      const partes = [];
+      if (n) partes.push(`${n} ${n === 1 ? "tarefa" : "tarefas"}`);
+      if (temConfig) partes.push("suas configurações");
+      document.querySelector("[data-importa-texto]").textContent =
+        `${partes.join(" e ")} deste navegador ${n + (temConfig ? 1 : 0) > 1 ? "vão" : "vai"} para a sua conta automaticamente.`;
+    }
+
+    document.querySelectorAll("[data-ir]").forEach((b) => (b.onclick = () => (location.hash = b.dataset.ir)));
+    addEventListener("hashchange", mostrar);
+
+    formAuth.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const modo = location.hash.slice(1) || "entrar";
+      const email = formAuth.email.value.trim();
+      const senha = formAuth.senha.value;
+      const falha = !formAuth.email.checkValidity() ? "Digite um e-mail válido."
+        : senha.length < 8 ? "A senha precisa de pelo menos 8 caracteres."
+        // simulação do erro do Supabase: qualquer senha "errada123"
+        : modo === "entrar" && senha === "errada123" ? "E-mail ou senha incorretos."
+        : null;
+      if (falha) {
+        erro.textContent = falha;
+        erro.hidden = false;
+        return;
+      }
+      if (modo === "criar") {
+        ultimoEnvio = `Enviamos um link de confirmação para ${email}. Clique nele para ativar a conta.`;
+        location.hash = "enviado";
+        document.querySelector("[data-enviado-texto]").textContent = ultimoEnvio;
+        return;
+      }
+      const n = store.tarefas().length;
+      store.entrar(email);
+      toastDepois(n ? `Conta conectada · ${n} ${n === 1 ? "tarefa importada" : "tarefas importadas"}` : "Conta conectada");
+      location.href = "index.html";
+    });
+
+    document.querySelector("[data-form-esqueci]").addEventListener("submit", (e) => {
+      e.preventDefault();
+      ultimoEnvio = `Se existir uma conta com ${e.target.email.value}, o link para criar uma senha nova chega em instantes.`;
+      document.querySelector("[data-enviado-texto]").textContent = ultimoEnvio;
+      location.hash = "enviado";
+    });
+
+    document.querySelector("[data-reenviar]").onclick = () => toast("Link reenviado.");
+
+    document.querySelector("[data-form-redefinir]").addEventListener("submit", (e) => {
+      e.preventDefault();
+      toastDepois("Senha atualizada. Você já está conectado.");
+      store.entrar(store.sessao()?.email ?? "voce@exemplo.com");
+      location.href = "index.html";
+    });
+
+    mostrar();
+  </script>
+</body>
+</html>

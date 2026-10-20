@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configurações · Pomodoro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="vamoo/tokens.css">
+  <link rel="stylesheet" href="vamoo/base.css">
+  <link rel="stylesheet" href="vamoo/components.css">
+  <link rel="stylesheet" href="vamoo/brand.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js"></script>
+</head>
+<body>
+  <header class="sitenav topbar">
+    <div class="wrap">
+      <a class="app-nome" href="index.html">
+        <span class="marca-infinito" aria-hidden="true"></span>
+        Pomodoro <small>por VAMOO AI</small>
+      </a>
+      <nav aria-label="Principal">
+        <a class="navlink" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>
+          <span class="rotulo">Timer</span>
+        </a>
+        <a class="navlink" href="configuracoes.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+          <span class="rotulo">Configurações</span>
+        </a>
+        <button class="navlink" data-tema aria-label="Alternar tema claro/escuro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+        </button>
+        <span data-conta></span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app wrap">
+    <form class="coluna" data-form>
+      <h1 class="titulo-pagina">Configurações</h1>
+
+      <section class="painel" aria-labelledby="s-tempo">
+        <h2 id="s-tempo">Tempo (minutos)</h2>
+        <div class="grade-3">
+          <div class="campo">
+            <label for="c-foco">Foco</label>
+            <input class="input" id="c-foco" name="foco" type="number" min="1" max="120" required>
+          </div>
+          <div class="campo">
+            <label for="c-curta">Pausa curta</label>
+            <input class="input" id="c-curta" name="curta" type="number" min="1" max="60" required>
+          </div>
+          <div class="campo">
+            <label for="c-longa">Pausa longa</label>
+            <input class="input" id="c-longa" name="longa" type="number" min="1" max="60" required>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="c-intervalo">Pausa longa a cada</label>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <input class="input" id="c-intervalo" name="intervaloLonga" type="number" min="2" max="10" required style="width:92px">
+            <span>focos</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="painel" aria-labelledby="s-auto">
+        <h2 id="s-auto">Automático</h2>
+        <label class="linha">
+          <span class="texto"><strong>Iniciar pausas sozinho</strong><span>A pausa começa assim que o foco termina.</span></span>
+          <input class="switch" type="checkbox" name="autoPausa">
+        </label>
+        <label class="linha">
+          <span class="texto"><strong>Iniciar focos sozinho</strong><span>O próximo foco começa assim que a pausa termina.</span></span>
+          <input class="switch" type="checkbox" name="autoFoco">
+        </label>
+      </section>
+
+      <section class="painel" aria-labelledby="s-som">
+        <h2 id="s-som">Som e notificação</h2>
+        <div class="campo">
+          <label for="c-som">Alarme</label>
+          <div class="som-controles">
+            <select class="input" id="c-som" name="som">
+              <option value="sino">Sino</option>
+              <option value="digital">Digital</option>
+              <option value="madeira">Madeira</option>
+              <option value="nenhum">Sem som</option>
+            </select>
+            <input type="range" name="volume" min="0" max="1" step="0.05" aria-label="Volume">
+            <button type="button" class="btn btn-ghost" style="height:40px;padding:0 16px" data-testar>Testar</button>
+          </div>
+        </div>
+        <label class="linha">
+          <span class="texto"><strong>Notificação do navegador</strong><span data-notif-texto></span></span>
+          <input class="switch" type="checkbox" name="notificar">
+        </label>
+        <div class="linha" data-notif-linha>
+          <span class="texto"><strong>Permissão</strong><span data-notif-ajuda></span></span>
+          <span style="display:flex;gap:.5rem;align-items:center">
+            <span class="selo" data-notif-selo></span>
+            <button type="button" class="btn btn-admin" data-permitir hidden>Permitir</button>
+          </span>
+        </div>
+      </section>
+
+      <div class="rodape-form">
+        <span class="salvo" data-salvo aria-live="polite"></span>
+        <span style="display:flex;gap:.6rem">
+          <button type="button" class="btn btn-ghost" data-restaurar>Restaurar padrão</button>
+          <button class="btn btn-primary">Salvar</button>
+        </span>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const form = document.querySelector("[data-form]");
+    const salvo = document.querySelector("[data-salvo]");
+
+    function preencher(c) {
+      for (const [k, v] of Object.entries(c)) {
+        const campo = form.elements[k];
+        if (!campo) continue;
+        campo.type === "checkbox" ? (campo.checked = v) : (campo.value = v);
+      }
+    }
+
+    function lerForm() {
+      const c = {};
+      for (const k of Object.keys(CONFIG_PADRAO)) {
+        const campo = form.elements[k];
+        c[k] = campo.type === "checkbox" ? campo.checked
+          : campo.type === "number" || campo.type === "range" ? Number(campo.value) : campo.value;
+      }
+      return c;
+    }
+
+    function renderOrigem() {
+      salvo.textContent = store.sessao()
+        ? `Sincronizado com ${store.sessao().email}`
+        : "Salvo só neste navegador";
+    }
+
+    // Os três estados da permissão. "denied" não tem volta pelo JS:
+    // só a pessoa, no cadeado da barra de endereço.
+    const NOTIF = {
+      default: ["Não decidida", "O navegador vai perguntar quando você clicar em Permitir."],
+      granted: ["Permitida", "Você recebe um aviso mesmo com a aba em segundo plano."],
+      denied: ["Bloqueada", "Desbloqueie no cadeado da barra de endereço e recarregue a página."],
+      indisponivel: ["Indisponível", "Este navegador não suporta notificações."],
+    };
+
+    function renderNotif() {
+      const estado = "Notification" in window ? Notification.permission : "indisponivel";
+      const [rotulo, ajuda] = NOTIF[estado];
+      const selo = document.querySelector("[data-notif-selo]");
+      selo.textContent = rotulo;
+      selo.dataset.estado = estado;
+      document.querySelector("[data-notif-ajuda]").textContent = ajuda;
+      document.querySelector("[data-permitir]").hidden = estado !== "default";
+      document.querySelector("[data-notif-linha]").hidden = !form.elements.notificar.checked;
+      document.querySelector("[data-notif-texto]").textContent = "Aviso no sistema ao fim de cada ciclo.";
+    }
+
+    document.querySelector("[data-permitir]").onclick = async () => {
+      await Notification.requestPermission();
+      renderNotif();
+    };
+    form.elements.notificar.onchange = renderNotif;
+
+    document.querySelector("[data-testar]").onclick = () =>
+      tocar(form.elements.som.value, Number(form.elements.volume.value));
+
+    document.querySelector("[data-restaurar]").onclick = () => {
+      preencher(CONFIG_PADRAO);
+      renderNotif();
+      salvo.textContent = "Padrão restaurado — clique em Salvar para aplicar";
+    };
+
+    form.addEventListener("input", () => (salvo.textContent = "Alterações não salvas"));
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      store.salvarConfig(lerForm());
+      renderOrigem();
+      toast("Configurações salvas. O timer usa os tempos novos no próximo ciclo.");
+    });
+
+    document.addEventListener("sessao", renderOrigem);
+    preencher(store.config());
+    renderOrigem();
+    renderNotif();
+  </script>
+</body>
+</html>
